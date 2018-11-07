@@ -1,12 +1,111 @@
 # SGE-On-CentOS
 
-本工程主要介绍了如何在CentOS上安装并使用SGE（Sun Grid Engine）。
+本工程主要介绍了如何在CentOS上安装并使用SGE（Sun Grid Engine）。使用配合使用NFS的SGE搭建计算集群，可以实现任务多机器并行运行。
 
 #### 工程文件夹说明
 
 softwares                      #安装包及其他软件包
- -- sge-8.1.9.tar.gz
+
+README.md                #安装、测试与SGE操作说明文档（本文件）
 
 ## 一. 安装
 
+本次安装
+
 SGE安装包下载地址：  https://arc.liv.ac.uk/downloads/SGE/releases/8.1.9/sge-8.1.9.tar.gz
+
+#### 1. 主控节点安装
+
+命令行执行，修改hostname
+
+```shell
+hostnamectl set-hostname qmaster.local
+```
+
+命令行执行，修改hosts文件，添加主控节点和两个计算节点信息
+
+```shell
+vi /etc/hosts
+192.168.98.134 qmaster.local qmaster
+192.168.98.135 compute01.local compute01
+192.168.98.136 compute02.local compute02
+```
+
+命令行执行，创建共享目录
+
+```shell
+mkdir -p /BiO/src
+```
+
+命令行执行，安装epel源
+
+```shell
+yum -y install epel-release
+```
+
+命令行执行，安装依赖库
+
+```shell
+yum -y install jemalloc-devel openssl-devel ncurses-devel pam-devel libXmu-devel hwloc-devel hwloc hwloc-libs java-devel javacc ant-junit libdb-devel motif-devel csh ksh xterm db4-utils perl-XML-Simple perl-Env xrog-x11-fonts-ISO8859-1-100dpi xrog-x11-fonts-ISO8859-1-75dpi
+```
+
+命令行执行，添加sgeadmin用户组，及sgeadmin用户
+
+```shell
+groupadd -g 490 sgeadmin
+useradd -u 495 -g 490 -m -d /home/sgeadmin -s /bin/bash -c "SGE Admin" sgeadmin
+```
+
+命令行执行，修改sudo文件，添加一行配置
+
+```shell
+visudo
+%sgeadmin ALL=(ALL) NOPASSWD: ALL
+```
+
+命令行执行，下载并编译SGE。（如果您下载不了SGE安装包，请到本工程/softwares目录下获取）
+
+```shell
+cd /BiO/src
+wget https://arc.liv.ac.uk/downloads/SGE/releases/8.1.9/sge-8.1.9.tar.gz
+tar -zxvf sge-8.1.9.tar.gz
+cd sge-8.1.9/source/
+sh scripts/bootstrap.sh && /.aimk && /.aimk -man
+export SGE_ROOT=/Bio/gridengine && mkdir $SGE_ROOT
+echo Y | ./scripts/distinst -local -allall -libs -noexit
+chown -R sgeadmin.ageadmin /BiO/gridengine
+```
+
+命令行执行，安装SGE qmaster节点
+```shell
+cd $SGE_ROOT
+./install_qmaster
+```
+
+#### 2. 计算节点安装（以compute01为例）
+
+命令行执行，安装依赖库
+
+```shell
+yum -y install hwloc-devel
+```
+
+命令行执行，修改hostname
+
+```shell
+hostnamectl set-hostname compute01.local
+```
+
+命令行执行，修改hosts文件，添加主控节点和两个计算节点信息
+
+```shell
+vi /etc/hosts
+192.168.98.134 qmaster.local qmaster
+192.168.98.135 compute01.local compute01
+192.168.98.136 compute02.local compute02
+```
+
+## 二. 测试
+
+
+## 三. SGE操作
