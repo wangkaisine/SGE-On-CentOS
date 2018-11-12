@@ -84,34 +84,34 @@ cd $SGE_ROOT
 
 安装过程中，需要同意一些默认配置。
 > press enter at the intro screen
- ress "y" and then specify sgeadmin as the user id
- eave the install dir as /BiO/gridengine
- ou will now be asked about port configuration for the master, normally you would choose the default (2) which uses the /etc/services file
- ccept the sge_qmaster info
- ou will now be asked about port configuration for the master, normally you would choose the default (2) which uses the /etc/services file
- ccept the sge_execd info
- eave the cell name as "default"
- nter an appropriate cluster name when requested
- eave the spool dir as is
- ress "n" for no windows hosts!
- ress "y" (permissions are set correctly)
- ress "y" for all hosts in one domain
- f you have Java available on your Qmaster and wish to use SGE Inspect or SDM then enable the JMX MBean server and provide the requested information - probably answer "n" at this point!
- ress enter to accept the directory creation notification
- nter "classic" for classic spooling (berkeleydb may be more appropriate for large clusters)
- ress enter to accept the next notice
- nter "20000-20100" as the GID range (increase this range if you have execution nodes capable of running more than 100 concurrent jobs)
- ccept the default spool dir or specify a different folder (for example if you wish to use a shared or local folder outside of SGE_ROOT
- nter an email address that will be sent problem reports
- ress "n" to refuse to change the parameters you have just configured
- ress enter to accept the next notice
- ress "y" to install the startup scripts
- ress enter twice to confirm the following messages
- ress "n" for a file with a list of hosts
- nter the names of your hosts who will be able to administer and submit jobs (enter alone to finish adding hosts)
- kip shadow hosts for now (press "n")
- hoose "1" for normal configuration and agree with "y"
- ress enter to accept the next message and "n" to refuse to see the previous screen again and then finally enter to exit the installer
+> press "y" and then specify sgeadmin as the user id
+> leave the install dir as /BiO/gridengine
+> You will now be asked about port configuration for the master, normally you would choose the default (2) which uses the /etc/services file
+> Accept the sge_qmaster info
+> You will now be asked about port configuration for the master, normally you would choose the default (2) which uses the /etc/services file
+> Accept the sge_execd info
+> Leave the cell name as "default"
+> Enter an appropriate cluster name when requested
+> Leave the spool dir as is
+> Press "n" for no windows hosts!
+> Press "y" (permissions are set correctly)
+> Press "y" for all hosts in one domain
+> If you have Java available on your Qmaster and wish to use SGE Inspect or SDM then enable the JMX MBean server and provide the requested information - probably answer "n" at this point!
+> Press enter to accept the directory creation notification
+> E nter "classic" for classic spooling (berkeleydb may be more appropriate for large clusters)
+> Press enter to accept the next notice
+> Enter "20000-20100" as the GID range (increase this range if you have execution nodes capable of running more than 100 concurrent jobs)
+> Accept the default spool dir or specify a different folder (for example if you wish to use a shared or local folder outside of SGE_ROOT
+> Enter an email address that will be sent problem reports
+> Press "n" to refuse to change the parameters you have just configured
+> Press enter to accept the next notice
+> Press "y" to install the startup scripts
+> Press enter twice to confirm the following messages
+> Press "n" for a file with a list of hosts
+> Enter the names of your hosts who will be able to administer and submit jobs (enter alone to finish adding hosts)
+> Skip shadow hosts for now (press "n")
+> Choose "1" for normal configuration and agree with "y"
+> Press enter to accept the next message and "n" to refuse to see the previous screen again and then finally enter to exit the installer
 
 命令行执行，安装NFS，将主控节点目录共享
 
@@ -151,23 +151,39 @@ vi /etc/hosts
 192.168.98.136 compute02.local compute02
 ```
 
+命令行执行，添加sgeadmin用户组，添加sgeadmin用户
+
+```shell
 groupadd -g 490 sgeadmin
 useradd -u 495 -g 490 -r -m -d /home/sgeadmin -s /bin/bash -c "SGE Admin" sgeadmin
+```
 
+命令行执行，安装NFS，并启动服务
+
+```shell
 yum -y install nfs-utils
 systemctl start rpcbind
 systemctl enable rpcbind
+```
 
+命令行执行，创建共享目录，将主控节点目录共享至计算节点
+
+```shell
 mkdir /BiO
 mount -t nfs 192.168.56.101:/BiO /BiO
 vi /etc/fstab
 192.168.98.134:/BiO /BiO nfs defaults 0 0
+```
 
+命令行执行，安装计算节点
+
+```shell
 export SGE_ROOT=/BiO/gridengine
 export SGE_CELL=default
 cd $SGE_ROOT
 ./install_execd
 cp /BiO/gridengine/default/common/settings.sh /etc/profile.d/
+```
 
 
 ## 二. 测试
